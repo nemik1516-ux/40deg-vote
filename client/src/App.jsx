@@ -1,30 +1,218 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API = "https://four0deg-backend.onrender.com";
+
 export default function App() {
 
   const cities = [
-    "Душанбе",
-    "Худжанд",
-    "Бохтар",
-    "Куляб",
-    "Вахдат",
-    "Гиссар",
-    "Рудаки",
-    "Турсунзаде",
-    "Пенджикент",
-    "Истаравшан",
-    "Исфара",
-    "Канибадам",
-    "Нурек",
-    "Яван",
-    "Дангара",
-    "Фархор",
-    "Хорог",
-    "Рашт",
-    "Восе",
-    "Шахринав"
-  ];
+  "Душанбе",
+
+  "Худжанд",
+  "Бустон",
+  "Гулистон",
+  "Истаравшан",
+  "Исфара",
+  "Канибадам",
+  "Пенджикент",
+
+  "Айни",
+  "Ашт",
+  "Бобоҷон Ғафуров",
+  "Деваштич",
+  "Зафаробод",
+  "Ҷаббор Расулов",
+  "Кӯҳистони Мастчоҳ",
+  "Мастчоҳ",
+  "Спитамен",
+  "Шаҳристон",
+
+  "Бохтар",
+  "Кӯлоб",
+  "Левакант",
+  "Норак",
+
+  "Абдураҳмони Ҷомӣ",
+  "Балҷувон",
+  "Вахш",
+  "Восеъ",
+  "Данғара",
+  "Дӯстӣ",
+  "Ёвон",
+  "Ҷайҳун",
+  "Ҷалолиддини Балхӣ",
+  "Кушониён",
+  "Қубодиён",
+  "Муъминобод",
+  "Носири Хусрав",
+  "Панҷ",
+  "Темурмалик",
+  "Фархор",
+  "Ховалинг",
+  "Хуросон",
+  "Шамсиддини Шоҳин",
+
+  "Ваҳдат",
+  "Турсунзода",
+  "Роғун",
+  "Ҳисор",
+
+  "Варзоб",
+  "Лахш",
+  "Нуробод",
+  "Рашт",
+  "Рӯдакӣ",
+  "Сангвор",
+  "Тоҷикобод",
+  "Файзобод",
+  "Шаҳринав",
+
+  "Хоруғ",
+
+  "Ванҷ",
+  "Дарвоз",
+  "Ишкошим",
+  "Мурғоб",
+  "Роштқалъа",
+  "Рӯшон",
+  "Шуғнон",
+
+  "Чоркуҳ",
+  "Сурх",
+  "Навгилем",
+  "Меҳробод",
+  "Қайроққум",
+  "Навобод",
+  "Обшорон",
+  "Сомониён",
+  "Зарафшон",
+  "Сарбанд",
+  "Баҳор",
+  "Гарм",
+  "Ғарм",
+  "Қалъаихум",
+  "Шайдона",
+  "Зарнисор",
+  "Чкаловск",
+  "Адрасмон",
+  "Консой",
+  "Шӯроб",
+  "Палос",
+  "Пахтакор",
+  "Меҳнатобод",
+  "Ориён",
+  "Сомон",
+  "Сайҳун",
+  "Чилгазӣ",
+  "Ҳаёти Нав",
+  "Гулистон",
+  "Навкат",
+  "Себистон",
+  "Қаратоғ",
+  "Шарора",
+  "Чоргул",
+  "Наврӯз",
+  "Сарихосор",
+  "Деҳмой",
+  "Қизилқалъа",
+  "Московский",
+  "50-солагии Тоҷикистон",
+  "Навбаҳор",
+  "Оқсу",
+  "Якатут",
+  "Сари Хосор",
+  "Қумсангир",
+  "Шаҳритус",
+  "Кангурт",
+  "Сарбанд",
+  "Зиғар",
+  "Даштобод",
+  "Сурхоб",
+  "Қалъаи Лаби Об",
+  "Меҳробод",
+  "Шаҳрак",
+  "Баҳористон",
+  "Суғд",
+  "Ромит",
+  "Чилонзор",
+  "Гулобод",
+  "Оби Гарм",
+  "Ҳоит",
+  "Тавилдара",
+  "Қазноқ",
+  "Сафеддара",
+  "Хумдон",
+  "Зидеҳ",
+  "Поршинев",
+  "Барсем",
+  "Сучон",
+  "Вичкут",
+  "Рангкул",
+  "Булункул",
+  "Аличур",
+  "Бартанг",
+  "Савноб",
+  "Пасор",
+  "Бидурд",
+  "Тавдем",
+  "Язгулом",
+  "Рошорв",
+  "Бачор",
+  "Андароб",
+  "Боғистон",
+  "Навгил",
+  "Чорбоғ",
+  "Шаҳракча",
+  "Қалъанак",
+  "Гулшан",
+  "Нилу",
+  "Сари Мазор",
+  "Ланглиф",
+  "Птуп",
+  "Дерзуд",
+  "Теҳарв",
+  "Ҷелондеҳ",
+  "Сежд",
+  "Миденшарв",
+  "Шитхарв",
+  "Басид",
+  "Вомар",
+  "Поршнев",
+  "Сипонҷ",
+  "Равмед",
+  "Баррушон",
+  "Чепдара",
+  "Паткнуоб",
+  "Мотравн",
+  "Боғев",
+  "Ҷавшангоз",
+  "Савда",
+  "Зонг",
+  "Намадгут",
+  "Ямчун",
+  "Вранг",
+  "Лангар",
+  "Андероб",
+  "Дашт",
+  "Ширгин",
+  "Птуп",
+  "Бибихонум",
+  "Даштак",
+  "Нишусп",
+  "Ривак",
+  "Тусён",
+  "Шидз",
+  "Техарв",
+  "Пажиш",
+  "Ҷамак",
+  "Деҳ",
+  "Чилдухтарон",
+  "Хидорҷев",
+  "Боғ",
+  "Вранг",
+  "Ратм",
+  "Миденвад"
+];
 
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
@@ -34,11 +222,9 @@ export default function App() {
   const [message, setMessage] = useState("");
 
   const [showAdmin, setShowAdmin] = useState(false);
-
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [login, setLogin] = useState("");
-
   const [password, setPassword] = useState("");
 
   const [settings, setSettings] = useState(null);
@@ -56,10 +242,10 @@ export default function App() {
     try {
 
       const res = await axios.get(
-        "https://four0deg-backend.onrender.com/api/results"
+        `${API}/api/results`
       );
 
-      setResults(res.data.results);
+      setResults(res.data.results || []);
 
     } catch (error) {
 
@@ -74,7 +260,7 @@ export default function App() {
     try {
 
       const res = await axios.get(
-        "https://four0deg-backend.onrender.com/api/settings"
+        `${API}/api/settings`
       );
 
       setSettings(res.data.settings);
@@ -152,7 +338,7 @@ export default function App() {
       setLoading(true);
 
       const res = await axios.post(
-        "https://four0deg-backend.onrender.com/api/vote",
+        `${API}/api/vote`,
         {
           city: selectedCity,
         }
@@ -162,21 +348,16 @@ export default function App() {
 
       setVoted(true);
 
-      fetchResults();
+      await fetchResults();
 
     } catch (error) {
 
       console.log(error);
 
-      if (error.response?.data?.message) {
-
-        setMessage(error.response.data.message);
-
-      } else {
-
-        setMessage("Ошибка сервера");
-
-      }
+      setMessage(
+        error.response?.data?.message ||
+        "Ошибка сервера"
+      );
 
       setVoted(true);
 
@@ -211,23 +392,35 @@ export default function App() {
 
     try {
 
-      const res = await axios.post(
-        "https://four0deg-backend.onrender.com/api/admin/start",
+      if (!endDate) {
+
+        alert("Выберите дату");
+
+        return;
+
+      }
+
+      await axios.post(
+        `${API}/api/admin/start`,
         {
           password: "4040degadmin",
           endDate,
         }
       );
 
-      alert(res.data.message);
+      alert("Голосование запущено");
 
-      fetchSettings();
+      await fetchSettings();
+
+      await fetchResults();
 
     } catch (error) {
 
+      console.log(error);
+
       alert(
         error.response?.data?.message ||
-        "Ошибка"
+        "Ошибка запуска"
       );
 
     }
@@ -238,22 +431,24 @@ export default function App() {
 
     try {
 
-      const res = await axios.post(
-        "https://four0deg-backend.onrender.com/api/admin/stop",
+      await axios.post(
+        `${API}/api/admin/stop`,
         {
           password: "4040degadmin",
         }
       );
 
-      alert(res.data.message);
+      alert("Голосование остановлено");
 
-      fetchSettings();
+      await fetchSettings();
 
     } catch (error) {
 
+      console.log(error);
+
       alert(
         error.response?.data?.message ||
-        "Ошибка"
+        "Ошибка остановки"
       );
 
     }
@@ -262,24 +457,38 @@ export default function App() {
 
   const resetVoting = async () => {
 
+    const confirmReset = confirm(
+      "Удалить все голоса?"
+    );
+
+    if (!confirmReset) return;
+
     try {
 
-      const res = await axios.post(
-        "https://four0deg-backend.onrender.com/api/admin/reset",
+      await axios.post(
+        `${API}/api/admin/reset`,
         {
           password: "4040degadmin",
         }
       );
 
-      alert(res.data.message);
+      alert("Все голоса удалены");
 
-      fetchResults();
+      setResults([]);
+
+      setVoted(false);
+
+      setSelectedCity("");
+
+      await fetchResults();
 
     } catch (error) {
 
+      console.log(error);
+
       alert(
         error.response?.data?.message ||
-        "Ошибка"
+        "Ошибка сброса"
       );
 
     }
@@ -454,12 +663,18 @@ export default function App() {
 
             <button
               onClick={handleVote}
-              disabled={!selectedCity || loading}
-              className="w-full bg-yellow-400 text-black font-bold py-4 rounded-2xl disabled:opacity-50"
+              disabled={
+                !selectedCity ||
+                loading ||
+                !settings?.voting_active
+              }
+              className="w-full bg-yellow-400 text-black font-bold py-4 rounded-2xl disabled:opacity-40"
             >
 
               {loading
                 ? "Отправка..."
+                : !settings?.voting_active
+                ? "Голосование остановлено"
                 : selectedCity
                 ? `Голосовать за ${selectedCity}`
                 : "Выберите город"}
@@ -549,14 +764,16 @@ export default function App() {
 
               <button
                 onClick={startVoting}
-                className="bg-green-500 text-black font-bold py-4 rounded-2xl"
+                disabled={!endDate}
+                className="bg-green-500 disabled:opacity-40 text-black font-bold py-4 rounded-2xl"
               >
                 START
               </button>
 
               <button
                 onClick={stopVoting}
-                className="bg-yellow-400 text-black font-bold py-4 rounded-2xl"
+                disabled={!settings?.voting_active}
+                className="bg-yellow-400 disabled:opacity-40 text-black font-bold py-4 rounded-2xl"
               >
                 STOP
               </button>
