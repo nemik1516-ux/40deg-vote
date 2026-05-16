@@ -78,6 +78,8 @@ app.get("/api/settings", async (req, res) => {
 
   } catch (error) {
 
+    console.log(error);
+
     res.status(500).json({
       success: false,
       error: error.message,
@@ -119,7 +121,9 @@ app.post("/api/vote", async (req, res) => {
 
     }
 
-    const endDate = new Date(votingSettings.voting_end);
+    const endDate = new Date(
+      votingSettings.voting_end
+    );
 
     if (new Date() > endDate) {
 
@@ -221,7 +225,7 @@ app.post("/api/admin/start", async (req, res) => {
 
   try {
 
-    const { password, days } = req.body;
+    const { password, endDate } = req.body;
 
     if (password !== process.env.ADMIN_PASSWORD) {
 
@@ -232,13 +236,20 @@ app.post("/api/admin/start", async (req, res) => {
 
     }
 
-    const endDate = new Date();
+    if (!endDate) {
 
-    endDate.setDate(
-      endDate.getDate() + (days || 7)
-    );
+      return res.status(400).json({
+        success: false,
+        message: "Дата не выбрана",
+      });
 
-    await pool.query("DELETE FROM settings");
+    }
+
+    const votingEndDate = new Date(endDate);
+
+    await pool.query(`
+      DELETE FROM settings
+    `);
 
     await pool.query(
       `
@@ -248,13 +259,13 @@ app.post("/api/admin/start", async (req, res) => {
       )
       VALUES ($1, $2)
       `,
-      [true, endDate]
+      [true, votingEndDate]
     );
 
     res.json({
       success: true,
       message: "Voting started",
-      endDate,
+      endDate: votingEndDate,
     });
 
   } catch (error) {
@@ -323,8 +334,13 @@ app.post("/api/admin/reset", async (req, res) => {
 
     }
 
-    await pool.query("DELETE FROM users");
-    await pool.query("DELETE FROM votes");
+    await pool.query(`
+      DELETE FROM users
+    `);
+
+    await pool.query(`
+      DELETE FROM votes
+    `);
 
     res.json({
       success: true,
@@ -348,6 +364,8 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
 
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `Server running on port ${PORT}`
+  );
 
 });
