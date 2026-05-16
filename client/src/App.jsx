@@ -56,7 +56,7 @@ export default function App() {
     try {
 
       const res = await axios.get(
-        "http://localhost:5000/api/results"
+        "https://four0deg-backend.onrender.com/api/results"
       );
 
       setResults(res.data.results);
@@ -74,7 +74,7 @@ export default function App() {
     try {
 
       const res = await axios.get(
-        "http://localhost:5000/api/settings"
+        "https://four0deg-backend.onrender.com/api/settings"
       );
 
       setSettings(res.data.settings);
@@ -152,7 +152,7 @@ export default function App() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/vote",
+        "https://four0deg-backend.onrender.com/api/vote",
         {
           city: selectedCity,
         }
@@ -212,7 +212,7 @@ export default function App() {
     try {
 
       const res = await axios.post(
-        "http://localhost:5000/api/admin/start",
+        "https://four0deg-backend.onrender.com/api/admin/start",
         {
           password: "4040degadmin",
           endDate,
@@ -239,7 +239,7 @@ export default function App() {
     try {
 
       const res = await axios.post(
-        "http://localhost:5000/api/admin/stop",
+        "https://four0deg-backend.onrender.com/api/admin/stop",
         {
           password: "4040degadmin",
         }
@@ -265,7 +265,7 @@ export default function App() {
     try {
 
       const res = await axios.post(
-        "http://localhost:5000/api/admin/reset",
+        "https://four0deg-backend.onrender.com/api/admin/reset",
         {
           password: "4040degadmin",
         }
