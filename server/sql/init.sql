@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  user_ip TEXT UNIQUE,
+  voted BOOLEAN DEFAULT false,
+  voted_city TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS votes (
+  id SERIAL PRIMARY KEY,
+  city TEXT UNIQUE,
+  total_votes INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  id SERIAL PRIMARY KEY,
+  voting_active BOOLEAN DEFAULT true,
+  voting_end TIMESTAMP
+);
