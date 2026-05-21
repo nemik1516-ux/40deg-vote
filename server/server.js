@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const axios = require("axios");
 
 const pool = require("./db");
 
@@ -26,6 +27,10 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+/* =========================
+   ROOT
+========================= */
+
 app.get("/", (req, res) => {
 
   res.json({
@@ -34,6 +39,10 @@ app.get("/", (req, res) => {
   });
 
 });
+
+/* =========================
+   RESULTS
+========================= */
 
 app.get("/api/results", async (req, res) => {
 
@@ -56,12 +65,16 @@ app.get("/api/results", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     });
 
   }
 
 });
+
+/* =========================
+   SETTINGS
+========================= */
 
 app.get("/api/settings", async (req, res) => {
 
@@ -84,19 +97,23 @@ app.get("/api/settings", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     });
 
   }
 
 });
 
+/* =========================
+   VOTERS
+========================= */
+
 app.get("/api/voters", async (req, res) => {
 
   try {
 
     const result = await pool.query(`
-      SELECT id, user_ip, voted_city, created_at
+      SELECT *
       FROM users
       ORDER BY id DESC
     `);
@@ -112,12 +129,16 @@ app.get("/api/voters", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     });
 
   }
 
 });
+
+/* =========================
+   VOTE
+========================= */
 
 app.post("/api/vote", async (req, res) => {
 
@@ -129,7 +150,7 @@ app.post("/api/vote", async (req, res) => {
 
       return res.status(400).json({
         success: false,
-        message: "City is required",
+        message: "Выберите город",
       });
 
     }
@@ -159,7 +180,8 @@ app.post("/api/vote", async (req, res) => {
 
       return res.status(400).json({
         success: false,
-        message: "Время голосования закончилось",
+        message:
+          "Время голосования закончилось",
       });
 
     }
@@ -244,12 +266,16 @@ app.post("/api/vote", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     });
 
   }
 
 });
+
+/* =========================
+   ADMIN START
+========================= */
 
 app.post("/api/admin/start", async (req, res) => {
 
@@ -257,7 +283,10 @@ app.post("/api/admin/start", async (req, res) => {
 
     const { password, endDate } = req.body;
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    if (
+      password !==
+      process.env.ADMIN_PASSWORD
+    ) {
 
       return res.status(401).json({
         success: false,
@@ -270,12 +299,14 @@ app.post("/api/admin/start", async (req, res) => {
 
       return res.status(400).json({
         success: false,
-        message: "Дата не выбрана",
+        message: "Выберите дату",
       });
 
     }
 
-    const votingEndDate = new Date(endDate);
+    const votingEndDate = new Date(
+      endDate
+    );
 
     await pool.query(`
       DELETE FROM settings
@@ -295,7 +326,6 @@ app.post("/api/admin/start", async (req, res) => {
     res.json({
       success: true,
       message: "Voting started",
-      endDate: votingEndDate,
     });
 
   } catch (error) {
@@ -304,12 +334,16 @@ app.post("/api/admin/start", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     });
 
   }
 
 });
+
+/* =========================
+   ADMIN STOP
+========================= */
 
 app.post("/api/admin/stop", async (req, res) => {
 
@@ -317,7 +351,10 @@ app.post("/api/admin/stop", async (req, res) => {
 
     const { password } = req.body;
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    if (
+      password !==
+      process.env.ADMIN_PASSWORD
+    ) {
 
       return res.status(401).json({
         success: false,
@@ -342,12 +379,16 @@ app.post("/api/admin/stop", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     });
 
   }
 
 });
+
+/* =========================
+   ADMIN RESET
+========================= */
 
 app.post("/api/admin/reset", async (req, res) => {
 
@@ -355,7 +396,10 @@ app.post("/api/admin/reset", async (req, res) => {
 
     const { password } = req.body;
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    if (
+      password !==
+      process.env.ADMIN_PASSWORD
+    ) {
 
       return res.status(401).json({
         success: false,
@@ -374,7 +418,8 @@ app.post("/api/admin/reset", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Voting reset successful",
+      message:
+        "Voting reset successful",
     });
 
   } catch (error) {
@@ -383,95 +428,370 @@ app.post("/api/admin/reset", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     });
 
   }
 
 });
 
-app.post("/api/admin/update-votes", async (req, res) => {
+/* =========================
+   ADMIN UPDATE VOTES
+========================= */
 
-  try {
+app.post(
+  "/api/admin/update-votes",
+  async (req, res) => {
 
-    const {
-      password,
-      city,
-      votes,
-    } = req.body;
+    try {
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+      const {
+        password,
+        city,
+        votes,
+      } = req.body;
 
-      return res.status(401).json({
+      if (
+        password !==
+        process.env.ADMIN_PASSWORD
+      ) {
+
+        return res.status(401).json({
+          success: false,
+          message: "Неверный пароль",
+        });
+
+      }
+
+      const existingVote =
+        await pool.query(
+          `
+        SELECT *
+        FROM votes
+        WHERE city = $1
+        `,
+          [city]
+        );
+
+      if (
+        existingVote.rows.length > 0
+      ) {
+
+        await pool.query(
+          `
+          UPDATE votes
+          SET total_votes = $1
+          WHERE city = $2
+          `,
+          [votes, city]
+        );
+
+      } else {
+
+        await pool.query(
+          `
+          INSERT INTO votes (
+            city,
+            total_votes
+          )
+          VALUES ($1, $2)
+          `,
+          [city, votes]
+        );
+
+      }
+
+      res.json({
+        success: true,
+        message: "Votes updated",
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
         success: false,
-        message: "Неверный пароль",
+        message: error.message,
       });
 
     }
 
-    if (!city) {
+  }
+);
 
-      return res.status(400).json({
+/* =========================
+   OSH SEND CODE
+========================= */
+
+app.post(
+  "/api/osh/send-code",
+  async (req, res) => {
+
+    try {
+
+      const {
+        full_name,
+        car_number,
+        phone,
+      } = req.body;
+
+      if (
+        !full_name ||
+        !car_number ||
+        !phone
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message:
+            "Заполните все поля",
+        });
+
+      }
+
+      const cleanPhone =
+        phone.replace(/\D/g, "");
+
+      const code = Math.floor(
+        1000 + Math.random() * 9000
+      ).toString();
+
+      const existingUser =
+        await pool.query(
+          `
+        SELECT *
+        FROM osh_users
+        WHERE phone = $1
+        `,
+          [cleanPhone]
+        );
+
+      if (
+        existingUser.rows.length > 0
+      ) {
+
+        await pool.query(
+          `
+          UPDATE osh_users
+          SET
+            full_name = $1,
+            car_number = $2,
+            verification_code = $3,
+            verified = false
+          WHERE phone = $4
+          `,
+          [
+            full_name,
+            car_number,
+            code,
+            cleanPhone,
+          ]
+        );
+
+      } else {
+
+        await pool.query(
+          `
+          INSERT INTO osh_users (
+            full_name,
+            car_number,
+            phone,
+            verification_code
+          )
+          VALUES ($1, $2, $3, $4)
+          `,
+          [
+            full_name,
+            car_number,
+            cleanPhone,
+            code,
+          ]
+        );
+
+      }
+
+      const txnId =
+        "txn_" + Date.now();
+
+      const smsResponse =
+        await axios.get(
+          process.env.SMS_SERVER,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.SMS_HASH}`,
+            },
+
+            params: {
+              login:
+                process.env.SMS_LOGIN,
+
+              from:
+                process.env.SMS_SENDER,
+
+              phone_number:
+                cleanPhone,
+
+              msg:
+                `Код подтверждения 40-ДЕГ: ${code}`,
+
+              txn_id: txnId,
+            },
+          }
+        );
+
+      console.log(
+        "SMS RESPONSE:",
+        smsResponse.data
+      );
+
+      res.json({
+        success: true,
+        message: "Код отправлен",
+      });
+
+    } catch (error) {
+
+      console.log(
+        "SMS ERROR:",
+        error?.response?.data ||
+          error.message
+      );
+
+      res.status(500).json({
         success: false,
-        message: "Город не выбран",
+        message:
+          JSON.stringify(
+            error?.response?.data
+          ) || error.message,
       });
 
     }
 
-    const existingVote = await pool.query(
-      `
+  }
+);
+
+/* =========================
+   OSH VERIFY
+========================= */
+
+app.post(
+  "/api/osh/verify",
+  async (req, res) => {
+
+    try {
+
+      const { phone, code } =
+        req.body;
+
+      const cleanPhone =
+        phone.replace(/\D/g, "");
+
+      const user = await pool.query(
+        `
       SELECT *
-      FROM votes
-      WHERE city = $1
+      FROM osh_users
+      WHERE phone = $1
       `,
-      [city]
-    );
+        [cleanPhone]
+      );
 
-    if (existingVote.rows.length > 0) {
+      if (user.rows.length === 0) {
+
+        return res.status(400).json({
+          success: false,
+          message:
+            "Пользователь не найден",
+        });
+
+      }
+
+      const dbUser = user.rows[0];
+
+      if (
+        dbUser.verification_code !==
+        code
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Неверный код",
+        });
+
+      }
 
       await pool.query(
         `
-        UPDATE votes
-        SET total_votes = $1
-        WHERE city = $2
+        UPDATE osh_users
+        SET verified = true
+        WHERE phone = $1
         `,
-        [votes, city]
+        [cleanPhone]
       );
 
-    } else {
+      const txnId =
+        "invite_" + Date.now();
 
-      await pool.query(
-        `
-        INSERT INTO votes (
-          city,
-          total_votes
-        )
-        VALUES ($1, $2)
-        `,
-        [city, votes]
+      const smsResponse =
+        await axios.get(
+          process.env.SMS_SERVER,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.SMS_HASH}`,
+            },
+
+            params: {
+              login:
+                process.env.SMS_LOGIN,
+
+              from:
+                process.env.SMS_SENDER,
+
+              phone_number:
+                cleanPhone,
+
+              msg:
+                "Табрик! Мо шуморо бо мусофиронатон рӯзи ҷумъа аз соати 12:00 то 16:00 дар 40-ДЕГ интизорем. Барои ҳисоб накардани маблағи ош дар касса ҳамин паёмакро нишон диҳед 🍛",
+
+              txn_id: txnId,
+            },
+          }
+        );
+
+      console.log(
+        "INVITE SMS:",
+        smsResponse.data
       );
+
+      res.json({
+        success: true,
+        message:
+          "Телефон подтвержден",
+      });
+
+    } catch (error) {
+
+      console.log(
+        "VERIFY ERROR:",
+        error?.response?.data ||
+          error.message
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          JSON.stringify(
+            error?.response?.data
+          ) || error.message,
+      });
 
     }
 
-    res.json({
-      success: true,
-      message: "Votes updated",
-    });
-
-  } catch (error) {
-
-    console.log(error);
-
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-
   }
+);
 
-});
-
-const PORT = process.env.PORT || 5000;
+const PORT =
+  process.env.PORT || 5000;
 
 app.listen(PORT, () => {
 
