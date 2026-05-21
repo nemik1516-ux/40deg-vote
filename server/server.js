@@ -10,12 +10,14 @@ const pool = require("./db");
 const app = express();
 
 app.use(cors());
+
 app.use(helmet());
+
 app.use(express.json());
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 10,
+  max: 20,
   message: {
     success: false,
     message: "Too many requests",
@@ -89,6 +91,34 @@ app.get("/api/settings", async (req, res) => {
 
 });
 
+app.get("/api/voters", async (req, res) => {
+
+  try {
+
+    const result = await pool.query(`
+      SELECT id, user_ip, voted_city, created_at
+      FROM users
+      ORDER BY id DESC
+    `);
+
+    res.json({
+      success: true,
+      voters: result.rows,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+
+  }
+
+});
+
 app.post("/api/vote", async (req, res) => {
 
   try {
@@ -104,15 +134,15 @@ app.post("/api/vote", async (req, res) => {
 
     }
 
-    const settings = await pool.query(`
+    const settingsResult = await pool.query(`
       SELECT *
       FROM settings
       LIMIT 1
     `);
 
-    const votingSettings = settings.rows[0];
+    const settings = settingsResult.rows[0];
 
-    if (!votingSettings?.voting_active) {
+    if (!settings?.voting_active) {
 
       return res.status(400).json({
         success: false,
@@ -121,11 +151,11 @@ app.post("/api/vote", async (req, res) => {
 
     }
 
-    const endDate = new Date(
-      votingSettings.voting_end
+    const votingEnd = new Date(
+      settings.voting_end
     );
 
-    if (new Date() > endDate) {
+    if (new Date() > votingEnd) {
 
       return res.status(400).json({
         success: false,
@@ -345,6 +375,87 @@ app.post("/api/admin/reset", async (req, res) => {
     res.json({
       success: true,
       message: "Voting reset successful",
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+
+  }
+
+});
+
+app.post("/api/admin/update-votes", async (req, res) => {
+
+  try {
+
+    const {
+      password,
+      city,
+      votes,
+    } = req.body;
+
+    if (password !== process.env.ADMIN_PASSWORD) {
+
+      return res.status(401).json({
+        success: false,
+        message: "Неверный пароль",
+      });
+
+    }
+
+    if (!city) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Город не выбран",
+      });
+
+    }
+
+    const existingVote = await pool.query(
+      `
+      SELECT *
+      FROM votes
+      WHERE city = $1
+      `,
+      [city]
+    );
+
+    if (existingVote.rows.length > 0) {
+
+      await pool.query(
+        `
+        UPDATE votes
+        SET total_votes = $1
+        WHERE city = $2
+        `,
+        [votes, city]
+      );
+
+    } else {
+
+      await pool.query(
+        `
+        INSERT INTO votes (
+          city,
+          total_votes
+        )
+        VALUES ($1, $2)
+        `,
+        [city, votes]
+      );
+
+    }
+
+    res.json({
+      success: true,
+      message: "Votes updated",
     });
 
   } catch (error) {
